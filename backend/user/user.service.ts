@@ -1,6 +1,6 @@
 import { APIError } from "encore.dev/api";
 import { db } from "../db/database";
-import { CreateUserResponse, User } from "./user.types";
+import { CreateUserResponse, GetAllUsersResponse, User } from "./user.types";
 
 export const createUser = async (email: string, name: string, role: string = 'user'): Promise<CreateUserResponse> => {
     console.log(`Creating user ${email} ${name} ${role}`);
@@ -15,9 +15,19 @@ export const createUser = async (email: string, name: string, role: string = 'us
     return toUserString(user);
 }
 
-// export const getAllUsers = async () => {
-//     return await db.select().from(users);
-// }
+export const getAllUsers = async (): Promise<GetAllUsersResponse> => {
+    const users = await db.query`SELECT * FROM users`;
+    const usersArray = [];
+    for await (const user of users) {
+        usersArray.push(toUserString(user as User));
+    }
+
+
+    if (!usersArray) {
+        throw APIError.notFound('No users found');
+    }
+    return { users: usersArray as CreateUserResponse[], count: usersArray.length };
+}
 
 // export const getUserByEmail = async (email: string) => {
 //     return await db.select().from(users).where(eq(users.email, email));

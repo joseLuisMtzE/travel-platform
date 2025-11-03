@@ -11,3 +11,8 @@ export interface CreateUserResponse {
     name: string;
     role: string;
 }
+
+export interface GetAllUsersResponse {
+    users: CreateUserResponse[];
+    count: number;
+}
