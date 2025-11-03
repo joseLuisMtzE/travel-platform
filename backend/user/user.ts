@@ -15,7 +15,6 @@ export const createUser = api(
         const validated = createUserSchema.safeParse({ email, name, role });
 
         if (!validated.success) {
-            console.log(`Error`, validated.error.issues[0].message);
             throw APIError.invalidArgument(validated.error.issues[0].message);
         }
 

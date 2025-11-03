@@ -3,12 +3,10 @@ import { db } from "../db/database";
 import { CreateUserResponse, GetAllUsersResponse, User } from "./user.types";
 
 export const createUser = async (email: string, name: string, role: string = 'user'): Promise<CreateUserResponse> => {
-    console.log(`Creating user ${email} ${name} ${role}`);
     if (await checkUserExists(email)) {
         throw APIError.alreadyExists('Email already exists');
     }
     const user = await db.queryRow<User>`INSERT INTO users (email, name, role) VALUES (${email}, ${name}, ${role}) RETURNING *`;
-    console.log(`User created ${user}`);
     if (!user) {
         throw new Error('Failed to create user');
     }
