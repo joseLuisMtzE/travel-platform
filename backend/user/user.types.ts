@@ -16,8 +16,3 @@ export interface GetAllUsersResponse {
     users: CreateUserResponse[];
     count: number;
 }
-export interface GetUserByEmailResponse extends CreateUserResponse {
-}
-
-export interface GetUserByIdResponse extends User {
-}
