@@ -1,6 +1,6 @@
 import { api, APIError } from "encore.dev/api";
 import { createUser as createUserService, getAllUsers as getAllUsersService, getUserByEmail as getUserByEmailService, getUserById as getUserByIdService} from "./user.service";
-import { User, CreateUserResponse, GetAllUsersResponse } from "./user.types";
+import { User, GetAllUsersResponse } from "./user.types";
 import { z } from "zod";
 
 const createUserSchema = z.object({
@@ -11,7 +11,7 @@ const createUserSchema = z.object({
 
 export const createUser = api(
     { method: "POST", path: "/users", expose: true },
-    async ({ email, name, role }: { email: string; name: string; role: string }): Promise<CreateUserResponse> => {
+    async ({ email, name, role }: { email: string; name: string; role: string }): Promise<User> => {
         const validated = createUserSchema.safeParse({ email, name, role });
 
         if (!validated.success) {

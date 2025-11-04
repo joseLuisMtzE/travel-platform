@@ -1,8 +1,8 @@
 import { APIError } from "encore.dev/api";
 import { db } from "../db/database";
-import { CreateUserResponse, GetAllUsersResponse, User } from "./user.types";
+import { GetAllUsersResponse, User } from "./user.types";
 
-export const createUser = async (email: string, name: string, role: string = 'user'): Promise<CreateUserResponse> => {
+export const createUser = async (email: string, name: string, role: string = 'user'): Promise<User> => {
     if (await checkUserExists(email)) {
         throw APIError.alreadyExists('Email already exists');
     }
@@ -10,21 +10,21 @@ export const createUser = async (email: string, name: string, role: string = 'us
     if (!user) {
         throw new Error('Failed to create user');
     }
-    return toUserString(user);
+    return user;
 }
 
 export const getAllUsers = async (): Promise<GetAllUsersResponse> => {
     const users = await db.query`SELECT * FROM users`;
-    const usersArray = [];
+    const usersArray: User[] = [];
     for await (const user of users) {
-        usersArray.push(toUserString(user as User));
+        usersArray.push(user as User);
     }
-
-
+    
     if (!usersArray) {
         throw APIError.notFound('No users found');
     }
-    return { users: usersArray as CreateUserResponse[], count: usersArray.length };
+
+    return { users: usersArray, count: usersArray.length };
 }
 
 export const getUserByEmail = async (email: string): Promise<User> => {
@@ -46,12 +46,4 @@ export const getUserById = async (id: number): Promise<User> => {
 export const checkUserExists = async (email: string) => {
     const res = await db.queryRow<User>`SELECT * FROM users WHERE email = ${email}`;
     return res !== null;
-}
-
-export const toUserString = (user: User) : CreateUserResponse => {
-    return {
-        email: user.email,
-        name: user.name,
-        role: user.role,
-    };
 }

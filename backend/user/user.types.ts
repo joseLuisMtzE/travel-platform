@@ -4,15 +4,10 @@ export interface User {
     name: string;
     role: "admin" | "user";
     created_at: Date;
-}
-
-export interface CreateUserResponse {
-    email: string;
-    name: string;
-    role: string;
+    updated_at: Date;
 }
 
 export interface GetAllUsersResponse {
-    users: CreateUserResponse[];
+    users: User[];
     count: number;
 }
