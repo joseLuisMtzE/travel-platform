@@ -1,6 +1,6 @@
 import { APIError } from "encore.dev/api";
 import { db } from "../db/database";
-import { CreateUserResponse, GetAllUsersResponse, User } from "./user.types";
+import { CreateUserResponse, GetAllUsersResponse, GetUserByEmailResponse, GetUserByIdResponse, User } from "./user.types";
 
 export const createUser = async (email: string, name: string, role: string = 'user'): Promise<CreateUserResponse> => {
     if (await checkUserExists(email)) {
@@ -27,9 +27,21 @@ export const getAllUsers = async (): Promise<GetAllUsersResponse> => {
     return { users: usersArray as CreateUserResponse[], count: usersArray.length };
 }
 
-// export const getUserByEmail = async (email: string) => {
-//     return await db.select().from(users).where(eq(users.email, email));
-// }
+export const getUserByEmail = async (email: string): Promise<GetUserByEmailResponse> => {
+    const user = await db.queryRow<User>`SELECT * FROM users WHERE email = ${email}`;
+    if (!user) {
+        throw APIError.notFound('User not found');
+    }
+    return toUserString(user as User);
+}
+
+export const getUserById = async (id: number): Promise<GetUserByIdResponse> => {
+    const user = await db.queryRow<User>`SELECT * FROM users WHERE id = ${id}`;
+    if (!user) {
+        throw APIError.notFound('User not found');
+    }
+    return user;
+}
 
 export const checkUserExists = async (email: string) => {
     const res = await db.queryRow<User>`SELECT * FROM users WHERE email = ${email}`;

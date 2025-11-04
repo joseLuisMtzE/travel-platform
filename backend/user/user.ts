@@ -1,6 +1,6 @@
 import { api, APIError } from "encore.dev/api";
-import { createUser as createUserService, getAllUsers as getAllUsersService} from "./user.service";
-import { User, CreateUserResponse, GetAllUsersResponse } from "./user.types";
+import { createUser as createUserService, getAllUsers as getAllUsersService, getUserByEmail as getUserByEmailService, getUserById as getUserByIdService} from "./user.service";
+import { User, CreateUserResponse, GetAllUsersResponse, GetUserByEmailResponse, GetUserByIdResponse } from "./user.types";
 import { z } from "zod";
 
 const createUserSchema = z.object({
@@ -26,5 +26,19 @@ export const getAllUsers = api(
     { method: "GET", path: "/users", expose: true },
     async (): Promise<GetAllUsersResponse> => {
         return await getAllUsersService();
+    }
+);
+
+export const getUserByEmail = api(
+    { method: "GET", path: "/users/:email", expose: true },
+    async ({ email }: { email: string }): Promise<GetUserByEmailResponse> => {
+        return await getUserByEmailService(email);
+    }
+);
+
+export const getUserById = api(
+    { method: "GET", path: "/user/:id", expose: true },
+    async ({ id }: { id: number }): Promise<GetUserByIdResponse> => {
+        return await getUserByIdService(id);
     }
 );
