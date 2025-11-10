@@ -1,0 +1,9 @@
+{
+  "name": "travel-platform",
+  "version": "1.0.0",
+  "description": "A travel platform backend API",
+  "scripts": {
+    "start:server": "cd backend && encore run",
+    "dev": "cd backend && encore run --dev"
+  }
+}
