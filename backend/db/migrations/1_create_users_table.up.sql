@@ -3,5 +3,6 @@ CREATE TABLE users (
     email TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    role TEXT NOT NULL DEFAULT 'user'
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    password TEXT NOT NULL
 );

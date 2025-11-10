@@ -1,0 +1,11 @@
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    role TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO roles (role) VALUES ('admin');
+INSERT INTO roles (role) VALUES ('user');
+
+ALTER TABLE users
+ADD COLUMN role_id BIGINT NOT NULL DEFAULT 2 REFERENCES roles(id);  

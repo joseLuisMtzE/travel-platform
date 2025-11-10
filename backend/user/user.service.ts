@@ -2,11 +2,11 @@ import { APIError } from "encore.dev/api";
 import { db } from "../db/database";
 import { GetAllUsersResponse, User } from "./user.types";
 
-export const createUser = async (email: string, name: string, role: string = 'user'): Promise<User> => {
+export const createUser = async (email: string, name: string, password: string): Promise<User> => {
     if (await checkUserExists(email)) {
         throw APIError.alreadyExists('Email already exists');
     }
-    const user = await db.queryRow<User>`INSERT INTO users (email, name, role) VALUES (${email}, ${name}, ${role}) RETURNING *`;
+    const user = await db.queryRow<User>`INSERT INTO users (email, name, password) VALUES (${email}, ${name}, ${password}) RETURNING *`;
     if (!user) {
         throw new Error('Failed to create user');
     }
