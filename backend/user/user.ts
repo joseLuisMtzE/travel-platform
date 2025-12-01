@@ -1,4 +1,5 @@
 import { api, APIError, Query } from "encore.dev/api";
+import { getAuthData } from "~encore/auth";
 import { createUser as createUserService, getAllUsers as getAllUsersService, getUserByEmail as getUserByEmailService, getUserById as getUserByIdService} from "./user.service";
 import { UserPublic, GetAllUsersResponse } from "./user.types";
 import { z } from "zod";
@@ -65,5 +66,30 @@ export const getUserById = api(
         }
         
         return await getUserByIdService(validated.data);
+    }
+);
+
+// Ejemplo de endpoint protegido que requiere autenticación
+// Para proteger un endpoint, agrega auth: true en las opciones
+// Nota: Después de ejecutar 'encore run', Encore regenerará los tipos de autenticación
+export const getMyProfile = api(
+    { method: "GET", path: "/users/me", expose: true, auth: true },
+    async (): Promise<UserPublic> => {
+        // Obtener datos del usuario autenticado
+        // En endpoints con auth: true, getAuthData() siempre retorna un valor
+        const authData = getAuthData() as { userID: string; email: string; role_id: number } | null;
+        
+        if (!authData) {
+            throw APIError.unauthenticated("Authentication required");
+        }
+        
+        // Convertir userID de string a number para la consulta
+        const userId = parseInt(authData.userID, 10);
+        if (isNaN(userId)) {
+            throw APIError.invalidArgument("Invalid user ID");
+        }
+        
+        // Obtener datos completos del usuario
+        return await getUserByIdService(userId);
     }
 );

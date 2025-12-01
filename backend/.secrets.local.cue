@@ -1,0 +1,1 @@
+JWTSecret: "secreto-super-seguro-aqui"
