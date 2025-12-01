@@ -6,10 +6,12 @@
   "license": "MPL-2.0",
   "type": "module",
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20.5.7",
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "encore.dev": "^1.51.4",
     "zod": "^4.1.12"
   }
