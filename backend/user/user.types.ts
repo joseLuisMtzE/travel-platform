@@ -8,7 +8,6 @@ export interface User {
     updated_at: Date;
 }
 
-
 export interface UserPublic {
     id: number;
     email: string;
