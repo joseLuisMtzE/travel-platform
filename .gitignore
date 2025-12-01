@@ -197,3 +197,6 @@ Thumbs.db
 
 # Encore specific
 .encore/
+
+# Especific files
+todoList.ts
