@@ -19,3 +19,8 @@ export interface AuthData {
     role_id: number;
 }
 
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+}
+

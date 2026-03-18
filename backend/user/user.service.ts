@@ -15,18 +15,34 @@ const hashPassword = async (password: string): Promise<string> => {
     return await bcrypt.hash(password, saltRounds);
 };
 
+const ROLE_ADMIN_ID = 1;
+const ROLE_USER_ID = 2;
+
 export const createUser = async (email: string, name: string, password: string): Promise<UserPublic> => {
+    return createUserWithRole(email, name, password, ROLE_USER_ID);
+};
+
+/** Crea usuario con un role_id dado. Solo admins pueden pasar role_id = 1 (admin). */
+export const createUserWithRole = async (
+    email: string,
+    name: string,
+    password: string,
+    role_id: number
+): Promise<UserPublic> => {
     if (await checkUserExists(email)) {
         throw APIError.alreadyExists('Email already exists');
     }
-    
+    if (role_id !== ROLE_USER_ID && role_id !== ROLE_ADMIN_ID) {
+        throw APIError.invalidArgument('Invalid role_id; must be 1 (admin) or 2 (user)');
+    }
+
     const hashedPassword = await hashPassword(password);
-    const user = await db.queryRow<User>`INSERT INTO users (email, name, password) VALUES (${email}, ${name}, ${hashedPassword}) RETURNING *`;
-    
+    const user = await db.queryRow<User>`INSERT INTO users (email, name, password, role_id) VALUES (${email}, ${name}, ${hashedPassword}, ${role_id}) RETURNING *`;
+
     if (!user) {
         throw APIError.internal('Failed to create user');
     }
-    
+
     return toUserPublic(user);
 }
 

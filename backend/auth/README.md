@@ -108,6 +108,11 @@ const authData = getAuthData();
 // authData.role_id - ID del rol del usuario
 ```
 
+### Otros endpoints de auth
+
+- **POST** `/auth/logout` (requiere `auth: true`): Cierra sesión. El cliente debe desechar el token. Respuesta: `{ "ok": true }`.
+- **POST** `/auth/change-password` (requiere `auth: true`): Cambia la contraseña del usuario autenticado. Body: `{ "currentPassword": "...", "newPassword": "..." }`. Mismas reglas de contraseña que en registro (8+ caracteres, mayúscula, minúscula, número).
+
 ### Usar el token en requests
 
 Cuando hagas requests a endpoints protegidos, incluye el token en el header `Authorization`:

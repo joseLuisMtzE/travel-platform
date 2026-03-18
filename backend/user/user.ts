@@ -1,6 +1,6 @@
 import { api, APIError, Query } from "encore.dev/api";
 import { getAuthData } from "~encore/auth";
-import { createUser as createUserService, getAllUsers as getAllUsersService, getUserByEmail as getUserByEmailService, getUserById as getUserByIdService} from "./user.service";
+import { createUser as createUserService, createUserWithRole as createUserWithRoleService, getAllUsers as getAllUsersService, getUserByEmail as getUserByEmailService, getUserById as getUserByIdService} from "./user.service";
 import { UserPublic, GetAllUsersResponse } from "./user.types";
 import { z } from "zod";
 
@@ -19,6 +19,10 @@ const emailSchema = z.string().email("Invalid email address").min(1, "Email is r
 
 const idSchema = z.string().regex(/^\d+$/, "ID must be a positive integer").transform((val) => parseInt(val, 10));
 
+const inviteUserSchema = createUserSchema.extend({
+    role_id: z.number().int().min(1).max(2).optional().default(2),
+});
+
 export const createUser = api(
     { method: "POST", path: "/users", expose: true },
     async ({ email, name, password }: { email: string; name: string; password: string }): Promise<UserPublic> => {
@@ -30,6 +34,36 @@ export const createUser = api(
         }
 
         return await createUserService(validated.data.email, validated.data.name, validated.data.password);
+    }
+);
+
+// Crear usuario con rol (protegido). Solo admins pueden asignar role_id = 1 (admin).
+export const inviteUser = api(
+    { method: "POST", path: "/users/invite", expose: true, auth: true },
+    async ({ email, name, password, role_id }: { email: string; name: string; password: string; role_id?: number }): Promise<UserPublic> => {
+        const validated = inviteUserSchema.safeParse({ email, name, password, role_id: role_id ?? 2 });
+
+        if (!validated.success) {
+            const firstError = validated.error.issues[0];
+            throw APIError.invalidArgument(firstError.message);
+        }
+
+        const authData = getAuthData() as { userID: string; role_id: number } | null;
+        if (!authData) {
+            throw APIError.unauthenticated("Authentication required");
+        }
+
+        const ADMIN_ROLE_ID = 1;
+        if (validated.data.role_id === ADMIN_ROLE_ID && authData.role_id !== ADMIN_ROLE_ID) {
+            throw APIError.permissionDenied("Only admins can create admin users");
+        }
+
+        return await createUserWithRoleService(
+            validated.data.email,
+            validated.data.name,
+            validated.data.password,
+            validated.data.role_id
+        );
     }
 );
 

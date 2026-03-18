@@ -4,8 +4,7 @@ import jwt from "jsonwebtoken";
 import { secret } from "encore.dev/config";
 import { db } from "../db/database";
 import { User } from "../user/user.types";
-import { LoginRequest, LoginResponse } from "./auth.types";
-import { AuthData } from "./auth.types";
+import { AuthData, LoginResponse } from "./auth.types";
 
 // Secret para JWT - debe configurarse como secret de Encore
 const jwtSecret = secret("JWTSecret");
@@ -128,5 +127,41 @@ export const verifyToken = async (token: string): Promise<AuthData> => {
         }
         throw error;
     }
+};
+
+// Hash de contraseña con bcrypt (mismo que user.service para consistencia)
+const hashPassword = async (password: string): Promise<string> => {
+    const saltRounds = 10;
+    return await bcrypt.hash(password, saltRounds);
+};
+
+// Cambiar contraseña del usuario autenticado
+export const changePassword = async (
+    userID: string,
+    currentPassword: string,
+    newPassword: string
+): Promise<void> => {
+    if (!currentPassword || !newPassword) {
+        throw APIError.invalidArgument("Current password and new password are required");
+    }
+    if (newPassword.length < 8) {
+        throw APIError.invalidArgument("New password must be at least 8 characters");
+    }
+
+    const userId = parseInt(userID, 10);
+    const user = await db.queryRow<User>`SELECT * FROM users WHERE id = ${userId}`;
+    if (!user) {
+        throw APIError.unauthenticated("User not found");
+    }
+
+    const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentValid) {
+        throw APIError.unauthenticated("Current password is incorrect");
+    }
+
+    const hashedNew = await hashPassword(newPassword);
+    await db.exec`
+        UPDATE users SET password = ${hashedNew}, updated_at = NOW() WHERE id = ${userId}
+    `;
 };
 
